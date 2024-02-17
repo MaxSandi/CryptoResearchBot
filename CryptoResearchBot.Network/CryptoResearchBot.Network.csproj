@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CryptoResearchBot.Core\CryptoResearchBot.Core.csproj" />
     <ProjectReference Include="..\CryptoResearchBot.Network.ETH\CryptoResearchBot.Network.ETH.csproj" />
-    <ProjectReference Include="..\CryptoResearchBot.Network.SOL\CryptoResearchBot.Network.SOL.csproj" />
   </ItemGroup>
 
 </Project>

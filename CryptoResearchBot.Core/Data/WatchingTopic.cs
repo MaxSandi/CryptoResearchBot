@@ -1,5 +1,6 @@
 ﻿using CryptoResearchBot.Core.Common;
 using CryptoResearchBot.Core.Extensions;
+using CryptoResearchBot.Core.Providers;
 using CryptoResearchBot.Core.TelegramAPI;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
@@ -8,14 +9,20 @@ namespace CryptoResearchBot.Core.Data
 {
     public class WatchingTopic
     {
+        private ITokenProvider _tokenProvider;
+        private readonly long _groupId;
+
         public int Id => Data.Id;
         public int MainMessageId => Data.MainMessageId;
 
         public BaseWatchingTopicData Data { get; set; }
 
-        public WatchingTopic(BaseWatchingTopicData watchingTopicData)
+        public WatchingTopic(BaseWatchingTopicData watchingTopicData, ITokenProvider tokenProvider, long groupId)
         {
             Data = watchingTopicData;
+
+            _tokenProvider = tokenProvider;
+            _groupId = groupId;
         }
 
         public async Task HandleMessage(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
@@ -72,7 +79,7 @@ namespace CryptoResearchBot.Core.Data
 
             try
             {
-                await botClient.EditTokenMessage(Data.GetMainInformation(), update.CallbackQuery.Message.MessageId, cancellationToken);
+                await botClient.EditTokenMessage(_groupId, Data.GetMainInformation(), update.CallbackQuery.Message.MessageId, cancellationToken);
             }
             catch (Exception e)
             {
@@ -84,7 +91,7 @@ namespace CryptoResearchBot.Core.Data
         {
             await TelegramApiProvider.LeaveChat(Data.ChannelInformation);
 
-            await botClient.DeleteForumTopicAsync(TelegramConstants.ChatId, Id, cancellationToken);
+            await botClient.DeleteForumTopicAsync(_groupId, Id, cancellationToken);
         }
 
         private void ParseMessage(long chatId, TL.Message messageEntity)
@@ -93,7 +100,7 @@ namespace CryptoResearchBot.Core.Data
             {
                 if(messageEntity.From is null || (Data.ChannelInformation.Owner is not null && Data.ChannelInformation.Owner.Id == messageEntity.From) || Data.ChannelInformation.Admins.Any(x => x.Id == messageEntity.From))
                 {
-                    //await _botClient.SendTextMessageAsync(TelegramConstants.ChatId, messageEntity.message, Id);
+                    //await _botClient.SendTextMessageAsync(_groupId, messageEntity.message, Id);
                     await TelegramApiProvider.ForwardMessageFromWatchingChat(messageEntity, Data.ChannelInformation, Id);
                 }
             });

@@ -1,16 +1,15 @@
 ﻿using CryptoResearchBot.Core.Interfaces;
-using CryptoResearchBot.Core.Network;
 using CryptoResearchBot.Core.Providers;
 using CryptoResearchBot.Core.TelegramAPI;
 using CryptoResearchBot.Core.Worker;
-using CryptoResearchBot.SOL;
+using CryptoResearchBot.ETH.Providers;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 
 internal class Program
 {
-    private static IResearchProvider ResearchProvider = new SolResearchProvider();
+    private static IResearchProvider ResearchProvider = new EthResearchProvider();
     private static TelegramBotClient researchBot = new TelegramBotClient(Environment.GetEnvironmentVariable("api_bot"));
 
     public static async Task Main(string[] args)

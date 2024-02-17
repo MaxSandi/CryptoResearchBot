@@ -1,8 +1,8 @@
 ﻿using CryptoResearchBot.Core.Data;
 
-namespace CryptoResearchBot.Network.SOL.Data
+namespace CryptoResearchBot.SOL.Data
 {
-    public class SolWatchingTopicData : BaseWatchingTopicData
+    internal class SolWatchingTopicData : BaseWatchingTopicData
     {
         public SolWatchingTopicData(int id, ChannelInformation channelInformation, BaseTokenData? tokenData) : base(id, channelInformation, tokenData)
         {

@@ -8,14 +8,6 @@ namespace CryptoResearchBot.Core.Extensions
 {
     public static class TelegramMessageExtensions
     {
-        public static InlineKeyboardMarkup NewFindedTokenKeyboard = new InlineKeyboardMarkup(new[]
-            {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("❌", TelegramCallbackData.DeleteTokenCallbackData)
-                },
-            });
-
         public static InlineKeyboardMarkup WatchingTokenKeyboard = new InlineKeyboardMarkup(new[]
             {
                 new []
@@ -30,10 +22,10 @@ namespace CryptoResearchBot.Core.Extensions
                 }
             });
 
-        public static async Task<Telegram.Bot.Types.Message> SendTokenMessage(this ITelegramBotClient telegramBot, string text, int messageThreadId, CancellationToken cancellationToken)
+        public static async Task<Telegram.Bot.Types.Message> SendTokenMessage(this ITelegramBotClient telegramBot, long chatId, string text, int messageThreadId, CancellationToken cancellationToken)
         {
             return await telegramBot.SendTextMessageAsync(
-                chatId: TelegramConstants.ChatId,
+                chatId: chatId,
                 parseMode: Telegram.Bot.Types.Enums.ParseMode.MarkdownV2,
                 text: text, 
                 disableWebPagePreview: true,
@@ -44,10 +36,10 @@ namespace CryptoResearchBot.Core.Extensions
 
 
 
-        public static async Task<Telegram.Bot.Types.Message> EditTokenMessage(this ITelegramBotClient telegramBot, string text, int messageId, CancellationToken cancellationToken)
+        public static async Task<Telegram.Bot.Types.Message> EditTokenMessage(this ITelegramBotClient telegramBot, long chatId, string text, int messageId, CancellationToken cancellationToken)
         {
             return await telegramBot.EditMessageTextAsync(
-                    chatId: TelegramConstants.ChatId,
+                    chatId: chatId,
                     messageId: messageId,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.MarkdownV2,
                     text: text,

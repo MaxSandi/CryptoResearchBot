@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoResearchBot", "CryptoResearchBot\CryptoResearchBot.csproj", "{CC62CAE1-3221-4071-BEC0-C01917E84218}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoResearchBot.SOL", "CryptoResearchBot\CryptoResearchBot.SOL.csproj", "{CC62CAE1-3221-4071-BEC0-C01917E84218}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoResearchBot.Core", "CryptoResearchBot.Core\CryptoResearchBot.Core.csproj", "{0FCF3A44-135C-49E9-9D4A-B0C8989B3C3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoResearchBot.Network", "CryptoResearchBot.Network\CryptoResearchBot.Network.csproj", "{756EC04E-90FB-4497-B31F-2567D8872D23}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoResearchBot.Network.ETH", "CryptoResearchBot.Network.ETH\CryptoResearchBot.Network.ETH.csproj", "{0F419C0E-C30B-464D-B0E0-1E37E783F70F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoResearchBot.Network.SOL", "CryptoResearchBot.Network.SOL\CryptoResearchBot.Network.SOL.csproj", "{2D43ACC0-8161-4422-A16C-0613DE3696C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoResearchBot.ETH", "CryptoResearchBot.ETH\CryptoResearchBot.ETH.csproj", "{A96F8D2E-2158-4EAC-B321-02568875E8C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,18 +23,10 @@ Global
 		{0FCF3A44-135C-49E9-9D4A-B0C8989B3C3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FCF3A44-135C-49E9-9D4A-B0C8989B3C3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FCF3A44-135C-49E9-9D4A-B0C8989B3C3C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{756EC04E-90FB-4497-B31F-2567D8872D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{756EC04E-90FB-4497-B31F-2567D8872D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{756EC04E-90FB-4497-B31F-2567D8872D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{756EC04E-90FB-4497-B31F-2567D8872D23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F419C0E-C30B-464D-B0E0-1E37E783F70F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F419C0E-C30B-464D-B0E0-1E37E783F70F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F419C0E-C30B-464D-B0E0-1E37E783F70F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F419C0E-C30B-464D-B0E0-1E37E783F70F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2D43ACC0-8161-4422-A16C-0613DE3696C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D43ACC0-8161-4422-A16C-0613DE3696C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2D43ACC0-8161-4422-A16C-0613DE3696C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2D43ACC0-8161-4422-A16C-0613DE3696C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A96F8D2E-2158-4EAC-B321-02568875E8C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A96F8D2E-2158-4EAC-B321-02568875E8C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A96F8D2E-2158-4EAC-B321-02568875E8C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A96F8D2E-2158-4EAC-B321-02568875E8C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -31,3 +31,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 /CryptoResearchBot/Properties/launchSettings.json
+/CryptoResearchBot.ETH/Properties/launchSettings.json

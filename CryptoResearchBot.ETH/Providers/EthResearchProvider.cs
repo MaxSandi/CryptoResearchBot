@@ -1,15 +1,14 @@
-﻿using CryptoResearchBot.Core.Common;
-using CryptoResearchBot.Core.Data;
+﻿using CryptoResearchBot.Core.Data;
 using CryptoResearchBot.Core.Interfaces;
-using CryptoResearchBot.Core.Network.Data;
+using CryptoResearchBot.Core.Network;
 using CryptoResearchBot.Core.Parser;
 using CryptoResearchBot.Core.Providers;
-using CryptoResearchBot.Network.ETH.Providers;
+using CryptoResearchBot.ETH.Data;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace CryptoResearchBot.Core.Network
+namespace CryptoResearchBot.ETH.Providers
 {
     public class EthResearchProvider : BaseResearchProvider
     {
