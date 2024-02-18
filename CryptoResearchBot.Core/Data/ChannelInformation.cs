@@ -60,10 +60,15 @@ namespace CryptoResearchBot.Core.Data
         public int CurrentUserCount { get; set; }
 
         public UserInformation? Owner { get; set; }
-        public IEnumerable<UserInformation> Admins { get; set; }
-        public IEnumerable<UserInformation> Contacts { get; set; }
+        public List<UserInformation> Admins { get; set; }
+        public List<UserInformation> Contacts { get; set; }
 
-        public ChannelInformation(long channelId, long acessHash, string name, int userCount, UserInformation? owner, IEnumerable<UserInformation> admins, IEnumerable<UserInformation> contacts)
+        public ChannelInformation()
+        {
+            
+        }
+
+        public ChannelInformation(long channelId, long acessHash, string name, int userCount, UserInformation? owner, List<UserInformation> admins, List<UserInformation> contacts)
         {
             Id = channelId;
             AccessHash = acessHash;
@@ -103,6 +108,11 @@ namespace CryptoResearchBot.Core.Data
         public static implicit operator InputChannel(ChannelInformation channelInformation)
         {
             return new InputChannel(channelInformation.Id, channelInformation.AccessHash);
+        }
+
+        public static implicit operator InputPeerChannel(ChannelInformation channelInformation)
+        {
+            return new InputPeerChannel(channelInformation.Id, channelInformation.AccessHash);
         }
 
         public ChannelInformation Clone()

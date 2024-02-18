@@ -10,6 +10,7 @@ using CryptoResearchBot.SOL.Extensions;
 using CryptoResearchBot.SOL.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -25,7 +26,7 @@ namespace CryptoResearchBot.SOL
         private IFindNewTokenProvider _findNewTokenProvider = new SolFindNewTokenProvider();
         public override IFindNewTokenProvider FindNewTokenProvider => _findNewTokenProvider;
 
-        public override ITokenProvider TokenProvider => throw new NotImplementedException();
+        public override ITokenProvider TokenProvider => null;
 
         protected override async Task HandleMessageInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -45,7 +46,7 @@ namespace CryptoResearchBot.SOL
                                     //await botClient.ForwardMessageAsync(-1002097195474, -1002097195474, update.CallbackQuery.Message.MessageId, messageThreadId: (int)TopicType.WatchingTokens);
                                     break;
                                 case TelegramCallbackData.DeleteTokenCallbackData:
-                                    await botClient.DeleteMessageAsync(-1002097195474, update.CallbackQuery.Message.MessageId);
+                                    await botClient.DeleteMessageAsync(ChatId, update.CallbackQuery.Message.MessageId);
                                     break;
 
                                 default:
@@ -62,13 +63,15 @@ namespace CryptoResearchBot.SOL
             {
                 if (update.Message.MessageThreadId == (int)TopicType.NewTokens || update.Message.MessageThreadId == (int)TopicType.SniperTokens)
                 {
+                    await botClient.DeleteMessageAsync(ChatId, update.Message.MessageId);
+
                     var tokenData = SolTokenData.CreateTokenData(update.Message.ReplyToMessage);
 
                     var watchingTopic = await CreateWatchingTopicAsync(botClient, update.Message.Text, tokenData, cancellationToken);
                     if (watchingTopic is not null)
                     {
-                        // пересылаем сообщение в отслеживаемые
-                        await botClient.ForwardMessageAsync(ChatId, ChatId, update.Message.ReplyToMessage.MessageId, (int)TopicType.WatchingTokens);
+                        //// пересылаем сообщение в отслеживаемые
+                        //await botClient.ForwardMessageAsync(ChatId, ChatId, update.Message.ReplyToMessage.MessageId, (int)TopicType.WatchingTokens);
 
                         _watchingTopics.AddOrUpdate(watchingTopic.Id, watchingTopic, (key, value) => value);
 
@@ -111,6 +114,29 @@ namespace CryptoResearchBot.SOL
                 {
 
                 }
+                else if(update.Message.MessageThreadId == (int)TopicType.Base)
+                {
+                    var watchingTopic = await CreateWatchingTopicAsync(botClient, update.Message.Text, null, cancellationToken);
+                    if (watchingTopic is not null)
+                    {
+                        _watchingTopics.AddOrUpdate(watchingTopic.Id, watchingTopic, (key, value) => value);
+
+                        await botClient.SendTextMessageAsync(
+                            chatId: ChatId,
+                            replyToMessageId: update.Message.MessageId,
+                            text: $"{MarkdownParser.GetConvertedText("✅✅✅✅✅✅")}",
+                            cancellationToken: cancellationToken);
+                        Console.WriteLine("Join to telegram channel!");
+                    }
+                    else
+                    {
+                        await botClient.SendTextMessageAsync(
+                            chatId: ChatId,
+                            replyToMessageId: update.Message.MessageId,
+                            text: $"{MarkdownParser.GetConvertedText("❗❗❗❗❗❗❗")}",
+                            cancellationToken: cancellationToken);
+                    }
+                }
             }
         }
 
@@ -121,7 +147,10 @@ namespace CryptoResearchBot.SOL
 
         protected override List<BaseWatchingTopicData> DeserializeTopics(string json)
         {
-            var topicDatas = JsonConvert.DeserializeObject<List<SolWatchingTopicData>>(json);
+            var topicDatas = JsonConvert.DeserializeObject<List<SolWatchingTopicData>>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
             if (topicDatas is null)
                 return new List<BaseWatchingTopicData>();
 
@@ -131,7 +160,10 @@ namespace CryptoResearchBot.SOL
         protected override string SerializeTopics()
         {
             List<SolWatchingTopicData> topicDatas = _watchingTopics.Select(x => x.Value.Data).OfType<SolWatchingTopicData>().ToList();
-            return JsonConvert.SerializeObject(topicDatas);
+            return JsonConvert.SerializeObject(topicDatas, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
         }
 
         public override async Task HandleNewTokens(ITelegramBotClient botClient, IEnumerable<ITokenData> tokens)

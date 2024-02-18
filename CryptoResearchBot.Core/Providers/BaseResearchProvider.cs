@@ -1,6 +1,7 @@
 ﻿using CryptoResearchBot.Core.Common;
 using CryptoResearchBot.Core.Data;
 using CryptoResearchBot.Core.Extensions;
+using CryptoResearchBot.Core.Helpers;
 using CryptoResearchBot.Core.Interfaces;
 using CryptoResearchBot.Core.Parser;
 using CryptoResearchBot.Core.Providers;
@@ -60,19 +61,23 @@ namespace CryptoResearchBot.Core.Network
 
         public async Task HandleMessageAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            if (update.Message is not null &&
-                update.Message.MessageThreadId is not null)
+            var message = update.Type switch
             {
-                if (_watchingTopics.TryGetValue(update.Message.MessageThreadId.Value, out var watchingTopic))
+                Telegram.Bot.Types.Enums.UpdateType.Message => update.Message,
+                Telegram.Bot.Types.Enums.UpdateType.CallbackQuery => update.CallbackQuery is not null ? update.CallbackQuery.Message : null,
+                _ => null,
+            };
+            if (message is not null &&
+                message.MessageThreadId is not null)
+            {
+                if (_watchingTopics.TryGetValue(message.MessageThreadId.Value, out var watchingTopic))
                 {
                     await watchingTopic.HandleMessage(botClient, update, cancellationToken);
-                    if (update.CallbackQuery is not null && 
-                        update.CallbackQuery.Message is not null &&
-                        update.CallbackQuery.Message.MessageThreadId is not null &&
+                    if (update.CallbackQuery is not null &&
                         update.CallbackQuery.Data == TelegramCallbackData.RemoveToken)
                     {
                         watchingTopic.StopListen();
-                        _watchingTopics.Remove(update.CallbackQuery.Message.MessageThreadId.Value, out var _);
+                        _watchingTopics.Remove(message.MessageThreadId.Value, out var _);
                     }
                 }
                 else
@@ -89,14 +94,18 @@ namespace CryptoResearchBot.Core.Network
             // добавляем новый топик
             var topic = await botClient.CreateForumTopicAsync(ChatId, channelInformation.Name);
 
-            // добавляем основное сообщение
+            // добавляем сообщение со статистикой канала (основное)
             var topicData = CreateWatchingTopicData(topic.MessageThreadId, channelInformation, tokenData);
             var message = await botClient.SendTokenMessage(ChatId, topicData.GetMainInformation(), topic.MessageThreadId, cancellationToken);
             topicData.MainMessageId = message.MessageId;
 
+            // добавляем сообщение с информацией о коллах (если есть)
+            await CallTokenHelper.PrepareTotalCallMessage(topicData);
+
             var newWatchingTopic = new WatchingTopic(topicData, TokenProvider, ChatId);
             // начинаем следить за сообщениями канала
             newWatchingTopic.StartListen();
+
             return newWatchingTopic;
         }
 

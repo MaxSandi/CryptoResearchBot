@@ -7,6 +7,7 @@ namespace CryptoResearchBot.Core.Data
     {
         public int Id { get; set; }
         public int MainMessageId { get; set; }
+        public int? TotalCallMessageId { get; set; }
 
         public BaseTokenData? Token { get; set; }
         public ChannelInformation ChannelInformation { get; set; }

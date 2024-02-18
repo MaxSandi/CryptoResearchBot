@@ -66,7 +66,10 @@ namespace CryptoResearchBot.ETH.Providers
 
         protected override List<BaseWatchingTopicData> DeserializeTopics(string json)
         {
-            var topicDatas = JsonConvert.DeserializeObject<List<EthWatchingTopicData>>(json);
+            var topicDatas = JsonConvert.DeserializeObject<List<EthWatchingTopicData>>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
             if (topicDatas is null)
                 return new List<BaseWatchingTopicData>();
 
@@ -76,7 +79,10 @@ namespace CryptoResearchBot.ETH.Providers
         protected override string SerializeTopics()
         {
             List<EthWatchingTopicData> topicDatas = _watchingTopics.Select(x => x.Value.Data).OfType<EthWatchingTopicData>().ToList();
-            return JsonConvert.SerializeObject(topicDatas);
+            return JsonConvert.SerializeObject(topicDatas, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
         }
     }
 }

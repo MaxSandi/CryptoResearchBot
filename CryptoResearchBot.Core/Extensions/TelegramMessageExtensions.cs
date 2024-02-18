@@ -34,8 +34,6 @@ namespace CryptoResearchBot.Core.Extensions
                 replyMarkup: WatchingTokenKeyboard);
         }
 
-
-
         public static async Task<Telegram.Bot.Types.Message> EditTokenMessage(this ITelegramBotClient telegramBot, long chatId, string text, int messageId, CancellationToken cancellationToken)
         {
             return await telegramBot.EditMessageTextAsync(

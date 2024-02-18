@@ -1,9 +1,12 @@
 ﻿using CryptoResearchBot.Core.Common;
 using CryptoResearchBot.Core.Extensions;
+using CryptoResearchBot.Core.Helpers;
 using CryptoResearchBot.Core.Providers;
 using CryptoResearchBot.Core.TelegramAPI;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TL;
 
 namespace CryptoResearchBot.Core.Data
 {
@@ -11,6 +14,8 @@ namespace CryptoResearchBot.Core.Data
     {
         private ITokenProvider _tokenProvider;
         private readonly long _groupId;
+
+        private List<long> _mutedUsers = new();
 
         public int Id => Data.Id;
         public int MainMessageId => Data.MainMessageId;
@@ -55,6 +60,15 @@ namespace CryptoResearchBot.Core.Data
             }
             else if(update.Type == UpdateType.Message && update.Message is not null)
             {
+                switch (update.Message.Text)
+                {
+                    case "/mute":
+                        if (update.Message.ReplyToMessage is not null && update.Message.ReplyToMessage.ForwardFrom is not null)
+                            _mutedUsers.Add(update.Message.ReplyToMessage.ForwardFrom.Id);
+                        break;
+                    default:
+                        break;
+                }
                 int z = 1;
             }
 
@@ -64,7 +78,11 @@ namespace CryptoResearchBot.Core.Data
         public void StartListen()
         {
             TL.InputChannel inputChahnnel = Data.ChannelInformation;
-            ChatListener.AddWatchingChat(inputChahnnel.channel_id, ParseMessage);
+            ChatListener.AddWatchingChat(inputChahnnel.channel_id, ParseMessageFromWatchingChannel);
+
+            // начинаем следить за коллами
+            if (Data.Token is not null)
+                CallTokenHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
         }
 
         public void StopListen()
@@ -94,15 +112,26 @@ namespace CryptoResearchBot.Core.Data
             await botClient.DeleteForumTopicAsync(_groupId, Id, cancellationToken);
         }
 
-        private void ParseMessage(long chatId, TL.Message messageEntity)
+        private void ParseMessageFromWatchingChannel(long chatId, TL.Message messageEntity)
         {
             Task.Run(async () =>
             {
+                if (messageEntity.From is not null && _mutedUsers.Contains(messageEntity.From))
+                    return;
+
                 if(messageEntity.From is null || (Data.ChannelInformation.Owner is not null && Data.ChannelInformation.Owner.Id == messageEntity.From) || Data.ChannelInformation.Admins.Any(x => x.Id == messageEntity.From))
                 {
                     //await _botClient.SendTextMessageAsync(_groupId, messageEntity.message, Id);
                     await TelegramApiProvider.ForwardMessageFromWatchingChat(messageEntity, Data.ChannelInformation, Id);
                 }
+            });
+        }
+
+        private void ParseMessageFromCallChannel(long chatId, TL.Message messageEntity)
+        {
+            Task.Run(async () =>
+            {
+                await TelegramApiProvider.ForwardMessageFromWatchingChat(messageEntity, Data.ChannelInformation, Id);
             });
         }
     }

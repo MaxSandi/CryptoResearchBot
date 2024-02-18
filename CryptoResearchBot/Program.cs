@@ -15,6 +15,8 @@ internal class Program
 
     public static async Task Main(string[] args)
     {
+        await TelegramApiProvider.InitializeAsync(ResearchProvider.GroupName);
+
         using CancellationTokenSource cts = new();
         researchBot.StartReceiving(
             updateHandler: HandleUpdateAsync,
@@ -26,7 +28,6 @@ internal class Program
         researchTokenWorker.NewTokensFinded += ResearchTokenWorker_NewTokensFinded;
         var researchTask = researchTokenWorker.StartResearch(cts.Token);
 
-        await TelegramApiProvider.InitializeAsync(ResearchProvider.GroupName);
 
         // загружаем наблюдаемые токены
         ResearchProvider.LoadWatchingTopics();

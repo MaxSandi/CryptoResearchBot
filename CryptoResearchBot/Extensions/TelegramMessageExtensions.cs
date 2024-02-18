@@ -22,8 +22,6 @@ namespace CryptoResearchBot.SOL.Extensions
         {
             var tokenInformation = token.GetInformation();
             var messageThreadId = (int)TopicType.NewTokens;
-            if (token is ITokenDatetimeInformation tokenDatetimeInformation)
-                messageThreadId = tokenDatetimeInformation.IsTokenStarted ? (int)TopicType.NewTokens : (int)TopicType.SniperTokens;
 
             return telegramBot.SendTextMessageAsync(
                 chatId: chatId,

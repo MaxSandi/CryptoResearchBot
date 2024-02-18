@@ -1,4 +1,5 @@
 ﻿using CryptoResearchBot.Core.Data;
+using CryptoResearchBot.Core.Helpers;
 using CryptoResearchBot.Core.Parser;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,9 @@ namespace CryptoResearchBot.Core.TelegramAPI
 
         public static User Me { get; private set; } = null;
 
-        private static readonly Dictionary<long, TL.User> Users = new();
-        private static readonly Dictionary<long, TL.ChatBase> Chats = new();
+        public static readonly Dictionary<long, TL.User> Users = new();
+        public static readonly Dictionary<long, TL.ChatBase> Chats = new();
+
         private static ChatBase? _researchChannel = null;
         private static DialogFilter? _solResearchDialogFilter;
 
@@ -30,7 +32,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             var dialogs = await Client.Messages_GetAllDialogs(); // dialogs = groups/channels/users
             dialogs.CollectUsersChats(Users, Chats);
 
-            _researchChannel = Chats[2097195474];
+            _researchChannel = Chats.Values.SingleOrDefault(x => x.Title.Equals(groupName));
 
             var dialogFilters = await Client.Messages_GetDialogFilters();
             _solResearchDialogFilter = dialogFilters.FirstOrDefault(x => x is not null && x.Title.Equals(groupName)) as DialogFilter;
@@ -78,6 +80,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             //}
 
             ChatListener.Initialize();
+            CallTokenHelper.Initialize();
         }
 
         public static async Task<ChannelInformation?> JoinToChat(string? chatLink)
@@ -120,13 +123,17 @@ namespace CryptoResearchBot.Core.TelegramAPI
                                 
                         }
 
+                        var ownerId = owner is not null ? owner.Id : -1;
+
                         var adminList = admins.users
-                            .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && (owner is not null && x.Value.ID != owner.Id))
-                            .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)));
-                        var contactList = contacts.users
-                            .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && (owner is not null && x.Value.ID != owner.Id))
+                            .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && x.Value.ID != ownerId)
                             .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)))
-                            .Except(adminList);
+                            .ToList();
+                        var contactList = contacts.users
+                            .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && x.Value.ID != ownerId)
+                            .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)))
+                            .Except(adminList)
+                            .ToList();
 
                         return new ChannelInformation(channel.id, channel.access_hash, channel.Title, chatInfo.full_chat.ParticipantsCount, owner, adminList, contactList);
 
@@ -155,13 +162,16 @@ namespace CryptoResearchBot.Core.TelegramAPI
                 {
                     channel.CurrentUserCount = chatInfo.full_chat.ParticipantsCount;
 
+                    var ownerId = channel.Owner is not null ? channel.Owner.Id : -1;
                     channel.Admins = admins.users
-                        .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && (channel.Owner is not null && x.Value.ID != channel.Owner.Id))
-                        .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)));
-                    channel.Contacts = contacts.users
-                        .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && (channel.Owner is not null && x.Value.ID != channel.Owner.Id))
+                        .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && x.Value.ID != ownerId)
                         .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)))
-                        .Except(channel.Admins);
+                        .ToList();
+                    channel.Contacts = contacts.users
+                        .Where(x => !x.Value.IsBot && x.Value.ID != Me.ID && x.Value.ID != ownerId)
+                        .Select(x => new UserInformation(x.Value.first_name + x.Value.last_name, new InputUser(x.Value.id, x.Value.access_hash)))
+                        .Except(channel.Admins)
+                        .ToList();
                 }
             }
             catch (Exception e)
@@ -210,9 +220,14 @@ namespace CryptoResearchBot.Core.TelegramAPI
             }
         }
 
-        internal static async Task ForwardMessageFromWatchingChat(Message messageEntity, InputChannel watchingChannel, int messageThreadId)
+        internal static async Task<MessageBase> ForwardMessageFromWatchingChat(Message messageEntity, InputChannel watchingChannel, int messageThreadId, bool pinMessage = false)
         {
-            await Client.Messages_ForwardMessages(watchingChannel, new[] { messageEntity.ID }, new[] { WTelegram.Helpers.RandomLong() }, _researchChannel, messageThreadId);
+            var result = await Client.Messages_ForwardMessages(watchingChannel, new[] { messageEntity.ID }, new[] { WTelegram.Helpers.RandomLong() }, _researchChannel, messageThreadId);
+            var newMessage = result.UpdateList.OfType<TL.UpdateNewChannelMessage>().First();
+            if (pinMessage)
+                await Client.Messages_UpdatePinnedMessage(_researchChannel, newMessage.message.ID);
+
+            return newMessage.message;
         }
     }
 }
