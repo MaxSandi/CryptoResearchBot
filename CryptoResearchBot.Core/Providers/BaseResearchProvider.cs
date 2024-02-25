@@ -57,6 +57,8 @@ namespace CryptoResearchBot.Core.Network
 
             var tokenFile = GetTokenFilePath();
             System.IO.File.WriteAllText(tokenFile, json);
+
+            Console.WriteLine("Watching topics saved!");
         }
 
         public async Task HandleMessageAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

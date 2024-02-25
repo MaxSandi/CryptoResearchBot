@@ -21,7 +21,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
         public static readonly Dictionary<long, TL.ChatBase> Chats = new();
 
         private static ChatBase? _researchChannel = null;
-        private static DialogFilter? _solResearchDialogFilter;
+        private static DialogFilter? _researchDialogFilter;
 
         public static async Task InitializeAsync(string groupName)
         {
@@ -35,7 +35,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             _researchChannel = Chats.Values.SingleOrDefault(x => x.Title.Equals(groupName));
 
             var dialogFilters = await Client.Messages_GetDialogFilters();
-            _solResearchDialogFilter = dialogFilters.FirstOrDefault(x => x is not null && x.Title.Equals(groupName)) as DialogFilter;
+            _researchDialogFilter = dialogFilters.FirstOrDefault(x => x is not null && x.Title.Equals(groupName)) as DialogFilter;
 
             //var contacts = await _client.Contacts_GetContacts();
             ////var user = contacts.users[1600841482];
@@ -97,13 +97,13 @@ namespace CryptoResearchBot.Core.TelegramAPI
                     var settings = new InputPeerNotifySettings() { mute_until = int.MaxValue, flags = InputPeerNotifySettings.Flags.has_mute_until };
                     await Client.Account_UpdateNotifySettings(channel, settings);
 
-                    if (_solResearchDialogFilter is not null)
+                    if (_researchDialogFilter is not null)
                     {
-                        var peers = _solResearchDialogFilter.include_peers.ToList();
+                        var peers = _researchDialogFilter.include_peers.ToList();
                         peers.Add(channel);
-                        _solResearchDialogFilter.include_peers = peers.ToArray();
+                        _researchDialogFilter.include_peers = peers.ToArray();
 
-                        await Client.Messages_UpdateDialogFilter(_solResearchDialogFilter.ID, _solResearchDialogFilter);
+                        await Client.Messages_UpdateDialogFilter(_researchDialogFilter.ID, _researchDialogFilter);
                     }
 
                     // собираем инфо про канал

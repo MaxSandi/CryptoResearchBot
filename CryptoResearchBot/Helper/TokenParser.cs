@@ -8,54 +8,55 @@ namespace CryptoResearchBot.SOL.Helper
         #region https://t.me/solanaburns
         public static SolTokenInfo? ParseTokenInformationFrom_solanaburns(string inputText)
         {
-            //Original Ultima Online(ULTIMA)
+            //PEPE AI(PEPEAI)
 
             //🔥 Burn Percentage: 100 %
-            //🕒 Trading Start Time: 1 minute ago
+            //🕒 Trading Start Time: 59 seconds ago
 
-            //📊 Marketcap: $5.15K
-            //💧 Liquidity: $2.93K(56.93 %)
-            //💵 Price: $0.005152
+            //📊 Marketcap: $1.64K
+            //💧 Liquidity: $2.60K(159.01 %)
+            //💵 Price: $0.000001638
 
-            //🚀 Launch MC: $618.71(x8)
-            //📦 Total Supply: 1M
+            //🚀 Launch MC: $1.03K(x2)
+            //📦 Total Supply: 1.00B
 
             //🌐 Socials:
-            //・https://twitter.com/aeyakovenko/status/1750197001105604725?fbclid=IwAR2oZjOLQsheIl3KHRfBhIo62vVjrc9RQpBNxm-Fb4W0xAd1GPDg4twaE4Q
-            //・https://t.me/ultimatokenonsol
-
+            //・https://www.pepeaisol.xyz
+            //・https://twitter.com/PepeAIonSOL
+            //・https://t.me/PEPEAISol
             //⚙️ Security:
-            //├ Mutable Metadata: No ✅
-            //├ Mint Authority: No ✅
+            //├ Mutable Metadata: Yes ❌
+            //├ Mint Authority: Yes ❌
             //└ Freeze Authority: No ✅
 
             //🏦 Top Holders:
-            //├ Raydium AMM | 262.21K | 26.22 %
-            //├ Creator | 150K | 15.00 %
-            //├ CBba...qiyU | 121.41K | 12.14 %
-            //├ 2bG1...Gvrc | 57.13K | 5.71 %
-            //└ 4Cve...ivhr | 52.47K | 5.25 %
+            //├ Raydium AMM | 775.66M | 77.57 %
+            //├ Di1s...VYo8 | 35.57M | 3.56 %
+            //├ 8sA4...dg6m | 21.07M | 2.11 %
+            //├ 7tP2...wGEw | 19.41M | 1.94 %
+            //└ 2zGJ...498w | 17.97M | 1.80 %
 
             //🧠 Score: Bad(2 issues) 🔴🔴🔴
-            //🟥 Creator owns 15 % of the supply
-            //🟧 Single holder ownership 12 %
+            //🟥 Mint Authority still enabled
+            //🟧 Mutable metadata
 
-            //Solscan | Birdeye | Dexscreener | Rugcheck
+            //Solscan | Birdeye | Dexscreener | Photon
 
-            //CMpPMyPSMBs5bwpUtob2Y4mmKDKBBDodByeMAwB3aSC1
+            //M4BRxogujzkxvrGY9dA3VGo1vnoTkfMzD27YUWCEwUH
+            //📣 AD: Your ad here? Contact us
 
-            //⚡ Trade faster on Solana with BONKbot
             SolTokenInfo tokenInfo = new SolTokenInfo();
 
             // Разделяем текст на строки
-
-
             string[] groupsArray = inputText.Split(new string[] { "\r\n\r\n", "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             tokenInfo.Name = groupsArray[0];
-            tokenInfo.Id = groupsArray[9];
-
             Console.WriteLine($"Accept {tokenInfo.Name}");
+
+            {
+                string[] lines = groupsArray[8].Split('\n');
+                tokenInfo.Id = lines[0];
+            }
 
             {
                 string[] lines = groupsArray[2].Split('\n');
@@ -74,7 +75,23 @@ namespace CryptoResearchBot.SOL.Helper
             }
 
             {
-                string[] lines = groupsArray[5].Split('\n');
+                string[] lines = groupsArray[4].Split('\n');
+                if(!lines[0].Contains("🌐 Socials: ⚙️ Security:"))
+                {
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        if (lines[i].Contains("🌐 Socials:"))
+                            continue;
+                        if (lines[i].Contains("⚙️ Security:"))
+                            break;
+
+                        tokenInfo.SocialBlock += lines[i] + "\n";
+                    }
+                }
+                tokenInfo.SocialBlock = tokenInfo.SocialBlock.TrimEnd('\n');
+                if (string.IsNullOrEmpty(tokenInfo.SocialBlock) || tokenInfo.SocialBlock.Contains("No links found"))
+                    return null;
+
                 var mintLine = lines.FirstOrDefault(line => line.Contains("Mint Authority"));
                 if (mintLine is null)
                     return null;
@@ -83,14 +100,10 @@ namespace CryptoResearchBot.SOL.Helper
                 tokenInfo.MintAuthority = parts[1].Trim().Contains("Yes") ? true : false;
             }
 
-            tokenInfo.SocialBlock = groupsArray[4];
-            if (tokenInfo.SocialBlock.Contains("No links found"))
-                return null;
-
-            tokenInfo.TopHoldersBlock = groupsArray[6];
+            tokenInfo.TopHoldersBlock = groupsArray[5];
 
             {
-                string[] lines = groupsArray[7].Split('\n').Where(x => x.Contains("Creator owns") || x.Contains("Single holder") || x.Contains("Creator sent")).ToArray();
+                string[] lines = groupsArray[6].Split('\n').Where(x => x.Contains("Creator owns") || x.Contains("Single holder") || x.Contains("Creator sent")).ToArray();
 
                 if(lines.Length > 0)
                 {
