@@ -2,6 +2,7 @@
 using CryptoResearchBot.Core.Providers;
 using CryptoResearchBot.Core.TelegramAPI;
 using CryptoResearchBot.Core.Worker;
+using CryptoResearchBot.ETH.API;
 using CryptoResearchBot.ETH.Providers;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;

@@ -7,6 +7,7 @@ using CryptoResearchBot.Core.Providers;
 using CryptoResearchBot.Core.TelegramAPI;
 using CryptoResearchBot.SOL.Data;
 using CryptoResearchBot.SOL.Extensions;
+using CryptoResearchBot.SOL.Providers;
 using CryptoResearchBot.SOL.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -26,7 +27,7 @@ namespace CryptoResearchBot.SOL
         private IFindNewTokenProvider _findNewTokenProvider = new SolFindNewTokenProvider();
         public override IFindNewTokenProvider FindNewTokenProvider => _findNewTokenProvider;
 
-        public override ITokenProvider TokenProvider => null;
+        public override ITokenProvider TokenProvider => new SolTokenProvider();
 
         protected override async Task HandleMessageInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {

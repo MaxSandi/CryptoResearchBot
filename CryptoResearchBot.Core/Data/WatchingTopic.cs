@@ -58,21 +58,36 @@ namespace CryptoResearchBot.Core.Data
                         }
                 }
             }
-            else if(update.Type == UpdateType.Message && update.Message is not null)
+            else if(update.Type == UpdateType.Message && update.Message is not null && update.Message.Text is not null)
             {
-                switch (update.Message.Text)
+                if(update.Message.Text.Contains("/ca"))
                 {
-                    case "/mute":
-                        if (update.Message.ReplyToMessage is not null && update.Message.ReplyToMessage.ForwardFrom is not null)
-                            _mutedUsers.Add(update.Message.ReplyToMessage.ForwardFrom.Id);
-                        break;
-                    default:
-                        break;
+                    var parsedCa = update.Message.Text.Split(" ", StringSplitOptions.TrimEntries);
+                    if(parsedCa.Length == 2)
+                    {
+                        Data.Token = await _tokenProvider.GetTokenDataFromContractAsync(parsedCa[1]);
+                        if(Data.Token is not null)
+                        {
+                            await RefreshInfoAsync(botClient, update, cancellationToken);
+
+                            await CallTokenHelper.PrepareTotalCallMessage(Data);
+                            CallTokenHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
+                        }
+                    }
                 }
-                int z = 1;
+                else
+                {
+                    switch (update.Message.Text)
+                    {
+                        case "/mute":
+                            if (update.Message.ReplyToMessage is not null && update.Message.ReplyToMessage.ForwardFrom is not null)
+                                _mutedUsers.Add(update.Message.ReplyToMessage.ForwardFrom.Id);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
-
-
         }
 
         public void StartListen()
@@ -97,11 +112,12 @@ namespace CryptoResearchBot.Core.Data
 
             try
             {
-                await botClient.EditTokenMessage(_groupId, Data.GetMainInformation(), update.CallbackQuery.Message.MessageId, cancellationToken);
+                await botClient.EditTokenMessage(_groupId, Data.GetMainInformation(), MainMessageId, cancellationToken);
             }
             catch (Exception e)
             {
-                await botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id);
+                if(update.CallbackQuery is not null)
+                    await botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id);
             }
         }
 

@@ -32,7 +32,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             var dialogs = await Client.Messages_GetAllDialogs(); // dialogs = groups/channels/users
             dialogs.CollectUsersChats(Users, Chats);
 
-            _researchChannel = Chats.Values.SingleOrDefault(x => x.Title.Equals(groupName));
+            _researchChannel = Chats.Values.SingleOrDefault(x => x.Title.Equals(groupName) && x.IsActive);
 
             var dialogFilters = await Client.Messages_GetDialogFilters();
             _researchDialogFilter = dialogFilters.FirstOrDefault(x => x is not null && x.Title.Equals(groupName)) as DialogFilter;

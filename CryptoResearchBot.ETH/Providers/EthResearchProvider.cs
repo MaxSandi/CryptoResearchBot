@@ -20,7 +20,7 @@ namespace CryptoResearchBot.ETH.Providers
         private IFindNewTokenProvider _findNewTokenProvider = new EthFindNewTokenProvider();
         public override IFindNewTokenProvider FindNewTokenProvider => _findNewTokenProvider;
 
-        public override ITokenProvider TokenProvider => throw new NotImplementedException();
+        public override ITokenProvider TokenProvider => new EthTokenProvider();
 
         protected override async Task HandleMessageInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
