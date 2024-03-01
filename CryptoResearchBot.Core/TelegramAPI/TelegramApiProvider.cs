@@ -80,7 +80,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             //}
 
             ChatListener.Initialize();
-            CallTokenHelper.Initialize();
+            TokenTelegramInformationHelper.Initialize();
         }
 
         public static async Task<ChannelInformation?> JoinToChat(string? chatLink)
@@ -220,7 +220,7 @@ namespace CryptoResearchBot.Core.TelegramAPI
             }
         }
 
-        internal static async Task<MessageBase> ForwardMessageFromWatchingChat(Message messageEntity, InputChannel watchingChannel, int messageThreadId, bool pinMessage = false)
+        public static async Task<MessageBase> ForwardMessageFromWatchingChat(Message messageEntity, InputChannel watchingChannel, int messageThreadId, bool pinMessage = false)
         {
             var result = await Client.Messages_ForwardMessages(watchingChannel, new[] { messageEntity.ID }, new[] { WTelegram.Helpers.RandomLong() }, _researchChannel, messageThreadId);
             var newMessage = result.UpdateList.OfType<TL.UpdateNewChannelMessage>().First();

@@ -70,8 +70,8 @@ namespace CryptoResearchBot.Core.Data
                         {
                             await RefreshInfoAsync(botClient, update, cancellationToken);
 
-                            await CallTokenHelper.PrepareTotalCallMessage(Data);
-                            CallTokenHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
+                            await TokenTelegramInformationHelper.PrepareTotalCallMessage(Data);
+                            TokenTelegramInformationHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
                         }
                     }
                 }
@@ -97,7 +97,7 @@ namespace CryptoResearchBot.Core.Data
 
             // начинаем следить за коллами
             if (Data.Token is not null)
-                CallTokenHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
+                TokenTelegramInformationHelper.AddWatchingToken(Data.Token.Id, ParseMessageFromCallChannel);
         }
 
         public void StopListen()

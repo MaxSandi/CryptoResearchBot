@@ -11,7 +11,7 @@ using WTelegram;
 
 namespace CryptoResearchBot.Core.Helpers
 {
-    public static class CallTokenHelper
+    public static class TokenTelegramInformationHelper
     {
         private static ConcurrentDictionary<string, Action<long, Message>> _watchingTokens = new ConcurrentDictionary<string, Action<long, Message>>();
 

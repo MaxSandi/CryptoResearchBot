@@ -101,10 +101,10 @@ namespace CryptoResearchBot.Core.Network
             var message = await botClient.SendTokenMessage(ChatId, topicData.GetMainInformation(), topic.MessageThreadId, cancellationToken);
             topicData.MainMessageId = message.MessageId;
 
-            // добавляем сообщение с информацией о коллах (если есть)
-            await CallTokenHelper.PrepareTotalCallMessage(topicData);
-
             var newWatchingTopic = new WatchingTopic(topicData, TokenProvider, ChatId);
+
+            await PrepareTotalCallInfoAsync(newWatchingTopic);
+
             // начинаем следить за сообщениями канала
             newWatchingTopic.StartListen();
 
@@ -119,6 +119,25 @@ namespace CryptoResearchBot.Core.Network
         protected abstract Task HandleMessageInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken);
 
         protected abstract BaseWatchingTopicData CreateWatchingTopicData(int topicId, ChannelInformation channelInformation, BaseTokenData? tokenData);
+
+        #region Prepare information
+        protected virtual async Task PrepareTokenInformationAsync(WatchingTopic watchingTopic)
+        {
+            await PrepareTotalCallInfoAsync(watchingTopic);
+
+            await PrepareTrendingInfoAsync(watchingTopic);
+        }
+
+        protected virtual Task PrepareTrendingInfoAsync(WatchingTopic watchingTopic)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected virtual async Task PrepareTotalCallInfoAsync(WatchingTopic watchingTopic)
+        {
+            await TokenTelegramInformationHelper.PrepareTotalCallMessage(watchingTopic.Data);
+        }
+        #endregion
 
         #region Private methods
         private string GetTokenFilePath()

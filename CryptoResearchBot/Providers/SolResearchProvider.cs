@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using TL;
 
 namespace CryptoResearchBot.SOL
 {
@@ -28,6 +29,18 @@ namespace CryptoResearchBot.SOL
         public override IFindNewTokenProvider FindNewTokenProvider => _findNewTokenProvider;
 
         public override ITokenProvider TokenProvider => new SolTokenProvider();
+
+        #region Handle messages
+        public override async Task HandleNewTokens(ITelegramBotClient botClient, IEnumerable<ITokenData> tokens)
+        {
+            foreach (var token in tokens)
+            {
+                if (token is SolTokenData solToken)
+                {
+                    await botClient.NewTokenFindMessage(ChatId, solToken);
+                }
+            }
+        }
 
         protected override async Task HandleMessageInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -115,7 +128,7 @@ namespace CryptoResearchBot.SOL
                 {
 
                 }
-                else if(update.Message.MessageThreadId == (int)TopicType.Base)
+                else if (update.Message.MessageThreadId == (int)TopicType.Base)
                 {
                     var watchingTopic = await CreateWatchingTopicAsync(botClient, update.Message.Text, null, cancellationToken);
                     if (watchingTopic is not null)
@@ -141,11 +154,9 @@ namespace CryptoResearchBot.SOL
             }
         }
 
-        protected override BaseWatchingTopicData CreateWatchingTopicData(int topicId, ChannelInformation channelInformation, BaseTokenData? tokenData)
-        {
-            return new SolWatchingTopicData(topicId, channelInformation, tokenData);
-        }
+        #endregion
 
+        #region Serialization
         protected override List<BaseWatchingTopicData> DeserializeTopics(string json)
         {
             var topicDatas = JsonConvert.DeserializeObject<List<SolWatchingTopicData>>(json, new JsonSerializerSettings
@@ -166,16 +177,46 @@ namespace CryptoResearchBot.SOL
                 TypeNameHandling = TypeNameHandling.Auto
             });
         }
+        #endregion
 
-        public override async Task HandleNewTokens(ITelegramBotClient botClient, IEnumerable<ITokenData> tokens)
+        #region Prepare information
+        protected override async Task PrepareTrendingInfoAsync(WatchingTopic watchingTopic)
         {
-            foreach (var token in tokens)
+            if (watchingTopic.Data.Token is null)
+                return;
+
+            var baseChannel = TelegramApiProvider.Chats.Values.SingleOrDefault(x => x.Title.Contains("DELUGE.CASH | EVENTS"));
+            if (baseChannel is not TL.Channel channel)
+                return;
+
+            ChatListener.AddWatchingChat(channel.ID, (long id, TL.Message message) =>
             {
-                if(token is SolTokenData solToken)
+                foreach (var watchingToken in _watchingTokens)
                 {
-                    await botClient.NewTokenFindMessage(ChatId, solToken);
+                    if (message.message.Contains(watchingToken.Key))
+                        watchingToken.Value.Invoke(id, message);
                 }
+            });
+
+            var messages = await TelegramApiProvider.Client.Messages_Search(channel, watchingTopic.Data.Token.Id);
+            if (messages is null)
+                return;
+
+            var message = messages.Messages.OfType<TL.Message>().FirstOrDefault();
+            if (message is not null)
+                await TelegramApiProvider.ForwardMessageFromWatchingChat(message, channel, watchingTopic.Id, true);
+
+            var channel = TelegramApiProvider.Chats.Values.SingleOrDefault(x => x.Title.Contains("Early Calls BOT"));
+            if (channel is not null)
+            {
+
             }
+        }
+        #endregion
+
+        protected override BaseWatchingTopicData CreateWatchingTopicData(int topicId, ChannelInformation channelInformation, BaseTokenData? tokenData)
+        {
+            return new SolWatchingTopicData(topicId, channelInformation, tokenData);
         }
     }
 }
