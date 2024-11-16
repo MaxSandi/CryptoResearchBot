@@ -32,3 +32,4 @@ _ReSharper*/
 packages/
 /CryptoResearchBot/Properties/launchSettings.json
 /CryptoResearchBot.ETH/Properties/launchSettings.json
+/CryptoResearchBot.SOL/Properties/launchSettings.json
